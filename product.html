@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Деталі товару</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    h1 {
+      color: #212529;
+      margin-bottom: 20px;
+    }
+    
+    .product-image {
+      width: 100%;
+      height: 400px;
+      object-fit: contain;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .price {
+      font-size: 28px;
+      font-weight: bold;
+      color: #d32f2f;
+      margin: 15px 0;
+    }
+    
+    .specs {
+      background: #f1f8e9;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #1976d2;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .back-link:hover {
+      text-decoration: underline;
+    }
+    
+    .category-badge {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="productContainer">
+    <h1>Завантаження...</h1>
+    <p>Будь ласка, зачекайте</p>
+  </div>
+
+  <script>
+    // Отримуємо ID товару з URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    
+    if (!productId) {
+      document.getElementById('productContainer').innerHTML = `
+        <h1>Помилка</h1>
+        <p>Не вказано ID товару. Поверніться на <a href="index.html" class="back-link">головну сторінку</a></p>
+      `;
+      throw new Error('ID товару не вказано');
+    }
+    
+    // Завантажуємо товари з localStorage
+    function loadProducts() {
+      const saved = localStorage.getItem('google-sites-products');
+      return saved ? JSON.parse(saved) : [];
+    }
+    
+    // Відображаємо товар
+    function renderProduct() {
+      const products = loadProducts();
+      const product = products.find(p => p.id == productId);
+      
+      if (!product) {
+        document.getElementById('productContainer').innerHTML = `
+          <h1>Товар не знайдено</h1>
+          <p>Можливо, він був видалений. Поверніться на <a href="index.html" class="back-link">головну сторінку</a></p>
+        `;
+        return;
+      }
+      
+      document.getElementById('productContainer').innerHTML = `
+        <div class="category-badge">${getCategoryName(product.category)}</div>
+        <h1>${product.name}</h1>
+        <img src="${product.image}" alt="${product.name}" class="product-image">
+        <p class="price">${product.price} грн</p>
+        <h2>Опис</h2>
+        <p>${product.description}</p>
+        <div class="specs">
+          <h2>Характеристики</h2>
+          <p>${product.specs.replace(/\n/g, '<br>')}</p>
+        </div>
+        <a href="index.html" class="back-link">← Повернутися до каталогу</a>
+      `;
+    }
+    
+    // Назви категорій
+    function getCategoryName(category) {
+      const names = {
+        'jacket': 'Куртка',
+        'glasses': 'Окуляри',
+        'shoes': 'Взуття',
+        'electronics': 'Електроніка',
+        'clothing': 'Одяг',
+        'home': 'Дім та побут'
+      };
+      return names[category] || category;
+    }
+    
+    // Ініціалізація
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(renderProduct, 300); // Невелика затримка для завантаження
+    });
+  </script>
+</body>
+</html>
